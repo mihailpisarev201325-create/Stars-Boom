@@ -2,12 +2,156 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Stars Boom</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+    <div class="app">
+        <!-- Шапка с балансом и кошельком -->
+        <div class="header">
+            <div class="wallet-badge">
+                <span class="wallet-icon">💎</span> <span id="wallet-address">UQDV...KGYY</span>
+            </div>
+            <div class="header-right">
+                <div class="balance-badge">
+                    <span class="star-icon">⭐</span> <span id="user-balance">9</span>
+                </div>
+                <div class="avatar">🐻</div>
+            </div>
+        </div>
+
+        <!-- Страница Главная -->
+        <div id="page-home" class="page active">
+            <div class="promo-banner">
+                <div class="promo-text">
+                    <h3>Получай звёзды за активность</h3>
+                    <p>Забрать награды →</p>
+                </div>
+                <div class="promo-icon">⭐</div>
+            </div>
+
+            <div class="section-title">Игры и режимы</div>
+            <div class="games-grid">
+                <div class="game-card">
+                    <div class="game-icon">⚡</div>
+                    <span>Апгрейдер</span>
+                </div>
+                <div class="game-card">
+                    <div class="game-icon">🎲</div>
+                    <span>Классика</span>
+                </div>
+                <div class="game-card">
+                    <div class="game-icon">🥊</div>
+                    <span>UFC</span>
+                </div>
+                <div class="game-card">
+                    <div class="game-icon">🚀</div>
+                    <span>Ракетка</span>
+                </div>
+                <div class="game-card">
+                    <div class="game-icon">⛏️</div>
+                    <span>Кирка</span>
+                </div>
+                <div class="game-card">
+                    <div class="game-icon">🎁</div>
+                    <span>Розыгрыши</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Страница Кейсы (как на скриншотах с предметами) -->
+        <div id="page-cases" class="page" style="display: none;">
+            <div class="nft-banner">
+                <span>777 = NFT</span>
+                <div class="nft-img">🐕</div>
+            </div>
+
+            <div class="section-title">Коллекционные кейсы</div>
+            <div class="cases-grid">
+                <div class="case-card" onclick="openCaseModal('Bonded Ring', 250, '💍')">
+                    <div class="case-img-box">💍</div>
+                    <div class="case-info">
+                        <div class="case-name">Bonded Ring</div>
+                        <div class="case-price-tag">41.46 TON</div>
+                    </div>
+                </div>
+                <div class="case-card" onclick="openCaseModal('Love Potion', 150, '🧪')">
+                    <div class="case-img-box">🧪</div>
+                    <div class="case-info">
+                        <div class="case-name">Love Potion</div>
+                        <div class="case-price-tag">13.39 TON</div>
+                    </div>
+                </div>
+                <div class="case-card" onclick="openCaseModal('Party Sparkler', 100, '🎉')">
+                    <div class="case-img-box">🎉</div>
+                    <div class="case-info">
+                        <div class="case-name">Party Sparkler</div>
+                        <div class="case-price-tag">3.597 TON</div>
+                    </div>
+                </div>
+                <div class="case-card" onclick="openCaseModal('Fresh Socks', 50, '🧦')">
+                    <div class="case-img-box">🧦</div>
+                    <div class="case-info">
+                        <div class="case-name">Fresh Socks</div>
+                        <div class="case-price-tag">3.575 TON</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Страница Лидеры -->
+        <div id="page-leaders" class="page" style="display: none;">
+            <div class="section-title">Таблица лидеров</div>
+            <div class="leader-item"><span>1. @mihail</span> <b>12500 ⭐</b></div>
+            <div class="leader-item"><span>2. @telegram_king</span> <b>9800 ⭐</b></div>
+            <div class="leader-item"><span>3. @crypto_star</span> <b>6400 ⭐</b></div>
+        </div>
+
+        <!-- Страница Профиль -->
+        <div id="page-profile" class="page" style="display: none;">
+            <div class="section-title">Личный кабинет</div>
+            <div class="profile-box">
+                <p>Ваш баланс: <b id="profile-balance">9</b> ⭐</p>
+                <button class="btn-deposit" onclick="addBalance()">Пополнить 100 ⭐ (Telegram Stars)</button>
+            </div>
+        </div>
+
+        <!-- Нижнее меню -->
+        <div class="nav-bar">
+            <div class="nav-item active" onclick="switchPage('home', this)">
+                <span class="nav-icon">🏠</span>
+                <span>Главная</span>
+            </div>
+            <div class="nav-item" onclick="switchPage('cases', this)">
+                <span class="nav-icon">🎁</span>
+                <span>Кейсы</span>
+            </div>
+            <div class="nav-item" onclick="switchPage('leaders', this)">
+                <span class="nav-icon">🏆</span>
+                <span>Лидеры</span>
+            </div>
+            <div class="nav-item" onclick="switchPage('profile', this)">
+                <span class="nav-icon">👤</span>
+                <span>Профиль</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно открытия кейса -->
+    <div id="case-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeCaseModal()">&times;</span>
+            <h2 id="modal-case-title">Кейс</h2>
+            <div class="drop-box" id="drop-animation-box">
+                <span id="drop-item-icon">❓</span>
+            </div>
+            <p id="drop-result-text" class="drop-text">Испытай удачу!</p>
+            <button class="btn-spin" id="spin-btn" onclick="startOpening()">Открыть кейс</button>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>
