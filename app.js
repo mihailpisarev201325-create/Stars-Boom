@@ -30,7 +30,13 @@ const cases = [
 let balance = 5000;
 let selectedCase = null;
 
-document.addEventListener("DOMContentLoaded", renderApp);
+document.addEventListener("DOMContentLoaded", () => {
+    if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
+        Telegram.WebApp.ready();
+        Telegram.WebApp.expand();
+    }
+    renderApp();
+});
 
 function renderApp() {
     document.body.innerHTML = `
