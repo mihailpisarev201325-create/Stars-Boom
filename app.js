@@ -1,200 +1,120 @@
-// Stars Boom — приложение с кейсами
+let tg = window.Telegram.WebApp;
+tg.expand();
 
-const cases = [
-    {
-        id: 1,
-        name: "Обычный кейс",
-        icon: "📦",
-        price: 100
-    },
-    {
-        id: 2,
-        name: "Редкий кейс",
-        icon: "🎁",
-        price: 500
-    },
-    {
-        id: 3,
-        name: "Золотой кейс",
-        icon: "👑",
-        price: 1000
-    },
-    {
-        id: 4,
-        name: "VIP кейс",
-        icon: "💎",
-        price: 2500
-    }
+let balance = 9;
+let currentCasePrice = 0;
+let currentCaseName = '';
+
+const rewards = [
+    { name: "1 ⭐", icon: "⭐", type: "stars", value: 1 },
+    { name: "5 ⭐", icon: "⭐", type: "stars", value: 5 },
+    { name: "30 ⭐", icon: "⭐", type: "stars", value: 30 },
+    { name: "Love Potion", icon: "🧪", type: "nft", value: 100 },
+    { name: "Bonded Ring", icon: "💍", type: "nft", value: 250 },
+    { name: "Fresh Socks", icon: "🧦", type: "nft", value: 50 }
 ];
 
-let balance = 5000;
-let selectedCase = null;
-
-document.addEventListener("DOMContentLoaded", () => {
-    if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
-        Telegram.WebApp.ready();
-        Telegram.WebApp.expand();
-    }
-    renderApp();
-});
-
-function renderApp() {
-    document.body.innerHTML = `
-        <div class="app">
-
-            <header class="header">
-                <div class="logo">
-                    🎁 <span>STARS BOOM</span>
-                </div>
-
-                <div class="balance" id="balance">
-                    ₽ ${balance}
-                </div>
-            </header>
-
-            <section class="hero">
-                <h1>Открывай кейсы 🎉</h1>
-                <p>Выбирай кейс и получай случайную награду!</p>
-            </section>
-
-            <div class="section-title">
-                Кейсы
-            </div>
-
-            <section class="cases">
-                ${cases.map(item => `
-                    <article class="case">
-
-                        <div class="case-icon">
-                            ${item.icon}
-                        </div>
-
-                        <h3>${item.name}</h3>
-
-                        <div class="price">
-                            ₽ ${item.price}
-                        </div>
-
-                        <button
-                            class="btn"
-                            onclick="openCase(${item.id})"
-                        >
-                            Открыть
-                        </button>
-
-                    </article>
-                `).join("")}
-            </section>
-
-        </div>
-
-        <div class="modal" id="modal">
-            <div class="modal-box">
-
-                <button class="close" onclick="closeModal()">
-                    ×
-                </button>
-
-                <h2 id="modalTitle">
-                    Кейс
-                </h2>
-
-                <p id="modalText" class="muted"></p>
-
-                <br>
-
-                <button
-                    class="btn"
-                    id="confirmButton"
-                    onclick="confirmCase()"
-                >
-                    Открыть
-                </button>
-
-            </div>
-        </div>
-    `;
+function updateBalanceDisplay() {
+    document.getElementById('user-balance').innerText = balance;
+    document.getElementById('profile-balance').innerText = balance;
 }
 
-function openCase(id) {
-    selectedCase = cases.find(item => item.id === id);
+function switchPage(pageId, element) {
+    document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+    document.getElementById('page-' + pageId).style.display = 'block';
 
-    if (!selectedCase) return;
-
-    document.getElementById("modalTitle").textContent =
-        selectedCase.icon + " " + selectedCase.name;
-
-    document.getElementById("modalText").textContent =
-        `Стоимость открытия: ₽ ${selectedCase.price}`;
-
-    document.getElementById("confirmButton").textContent =
-        "Открыть";
-
-    document.getElementById("confirmButton").onclick =
-        confirmCase;
-
-    document.getElementById("modal").classList.add("show");
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    element.classList.add('active');
 }
 
-function closeModal() {
-    document.getElementById("modal").classList.remove("show");
-    selectedCase = null;
+function openCaseModal(name, price, icon) {
+    currentCaseName = name;
+    currentCasePrice = price;
+    
+    document.getElementById('modal-case-title').innerText = name;
+    document.getElementById('modal-case-price').innerText = price;
+    document.getElementById('drop-item-icon').innerText = icon;
+    document.getElementById('drop-result-text').innerText = "Нажмите кнопку, чтобы открыть!";
+    document.getElementById('spin-btn').style.display = 'block';
+    
+    document.getElementById('case-modal').classList.add('show');
 }
 
-function confirmCase() {
-    if (!selectedCase) return;
+function closeCaseModal() {
+    document.getElementById('case-modal').classList.remove('show');
+}
 
-    if (balance < selectedCase.price) {
-        document.getElementById("modalText").textContent =
-            "❌ Недостаточно денег!";
-
+function startOpening() {
+    if (balance < currentCasePrice) {
+        alert("Недостаточно звёзд на балансе!");
         return;
     }
 
-    balance -= selectedCase.price;
+    balance -= currentCasePrice;
+    updateBalanceDisplay();
 
-    const reward = getReward();
+    let spinBtn = document.getElementById('spin-btn');
+    spinBtn.style.display = 'none';
 
-    balance += reward;
+    let dropBox = document.getElementById('drop-animation-box');
+    let resultText = document.getElementById('drop-result-text');
+    let iconElem = document.getElementById('drop-item-icon');
 
-    updateBalance();
+    resultText.innerText = "Кейс открывается...";
+    
+    let counter = 0;
+    let interval = setInterval(() => {
+        let randomReward = rewards[Math.floor(Math.random() * rewards.length)];
+        iconElem.innerText = randomReward.icon;
+        counter++;
 
-    document.getElementById("modalTitle").textContent =
-        "🎉 Поздравляем!";
-
-    document.getElementById("modalText").textContent =
-        `Ты получил награду: ₽ ${reward}`;
-
-    document.getElementById("confirmButton").textContent =
-        "Закрыть";
-
-    document.getElementById("confirmButton").onclick =
-        closeModal;
+        if (counter > 10) {
+            clearInterval(interval);
+            let finalReward = rewards[Math.floor(Math.random() * rewards.length)];
+            iconElem.innerText = finalReward.icon;
+            resultText.innerHTML = `Вы выиграли: <b>${finalReward.name}</b>!`;
+            
+            if (finalReward.type === 'stars') {
+                balance += finalReward.value;
+                updateBalanceDisplay();
+            }
+        }
+    }, 100);
 }
 
-function getReward() {
-    const rewards = [
-        50,
-        100,
-        250,
-        500,
-        1000,
-        2500,
-        5000
-    ];
+function addBalance() {
+    let starsToAdd = 100;
 
-    const randomIndex =
-        Math.floor(Math.random() * rewards.length);
-
-    return rewards[randomIndex];
-}
-
-function updateBalance() {
-    const balanceElement =
-        document.getElementById("balance");
-
-    if (balanceElement) {
-        balanceElement.textContent =
-            `₽ ${balance}`;
+    if (tg.openInvoice) {
+        fetch('https://stars-boom-backend-2yvy.onrender.com/create-invoice', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ stars: starsToAdd })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.invoice_link) {
+                tg.openInvoice(data.invoice_link, (status) => {
+                    if (status === 'paid') {
+                        balance += starsToAdd;
+                        updateBalanceDisplay();
+                        alert("Оплата прошла успешно! Баланс пополнен.");
+                    } else {
+                        alert("Оплата была отменена.");
+                    }
+                });
+            } else {
+                alert("Ошибка создания счета: " + (data.error || 'Неизвестно'));
+            }
+        })
+        .catch(err => {
+            alert("Ошибка соединения с сервером оплаты.");
+        });
+    } else {
+        balance += starsToAdd;
+        updateBalanceDisplay();
+        alert("Тестовое пополнение (вне Telegram)!");
     }
 }
+
+updateBalanceDisplay();
