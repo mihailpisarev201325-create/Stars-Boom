@@ -1,4 +1,4 @@
-// Приложение с кейсами
+// Stars Boom — приложение с кейсами
 
 const cases = [
     {
@@ -30,9 +30,7 @@ const cases = [
 let balance = 5000;
 let selectedCase = null;
 
-document.addEventListener("DOMContentLoaded", () => {
-    renderApp();
-});
+document.addEventListener("DOMContentLoaded", renderApp);
 
 function renderApp() {
     document.body.innerHTML = `
@@ -40,7 +38,7 @@ function renderApp() {
 
             <header class="header">
                 <div class="logo">
-                    🎁 <span>КЕЙСЫ</span>
+                    🎁 <span>STARS BOOM</span>
                 </div>
 
                 <div class="balance" id="balance">
@@ -50,9 +48,7 @@ function renderApp() {
 
             <section class="hero">
                 <h1>Открывай кейсы 🎉</h1>
-                <p>
-                    Выбирай кейс и попробуй получить награду!
-                </p>
+                <p>Выбирай кейс и получай случайную награду!</p>
             </section>
 
             <div class="section-title">
@@ -67,9 +63,7 @@ function renderApp() {
                             ${item.icon}
                         </div>
 
-                        <h3>
-                            ${item.name}
-                        </h3>
+                        <h3>${item.name}</h3>
 
                         <div class="price">
                             ₽ ${item.price}
@@ -88,16 +82,10 @@ function renderApp() {
 
         </div>
 
-        <div
-            class="modal"
-            id="modal"
-        >
+        <div class="modal" id="modal">
             <div class="modal-box">
 
-                <button
-                    class="close"
-                    onclick="closeModal()"
-                >
+                <button class="close" onclick="closeModal()">
                     ×
                 </button>
 
@@ -105,10 +93,7 @@ function renderApp() {
                     Кейс
                 </h2>
 
-                <p
-                    id="modalText"
-                    class="muted"
-                ></p>
+                <p id="modalText" class="muted"></p>
 
                 <br>
 
@@ -126,12 +111,9 @@ function renderApp() {
 }
 
 function openCase(id) {
-
     selectedCase = cases.find(item => item.id === id);
 
-    if (!selectedCase) {
-        return;
-    }
+    if (!selectedCase) return;
 
     document.getElementById("modalTitle").textContent =
         selectedCase.icon + " " + selectedCase.name;
@@ -139,15 +121,74 @@ function openCase(id) {
     document.getElementById("modalText").textContent =
         `Стоимость открытия: ₽ ${selectedCase.price}`;
 
-    document
-        .getElementById("modal")
-        .classList.add("show");
+    document.getElementById("confirmButton").textContent =
+        "Открыть";
+
+    document.getElementById("confirmButton").onclick =
+        confirmCase;
+
+    document.getElementById("modal").classList.add("show");
 }
 
 function closeModal() {
+    document.getElementById("modal").classList.remove("show");
+    selectedCase = null;
+}
 
-    document
-        .getElementById("modal")
-        .classList.remove("show");
+function confirmCase() {
+    if (!selectedCase) return;
 
-   
+    if (balance < selectedCase.price) {
+        document.getElementById("modalText").textContent =
+            "❌ Недостаточно денег!";
+
+        return;
+    }
+
+    balance -= selectedCase.price;
+
+    const reward = getReward();
+
+    balance += reward;
+
+    updateBalance();
+
+    document.getElementById("modalTitle").textContent =
+        "🎉 Поздравляем!";
+
+    document.getElementById("modalText").textContent =
+        `Ты получил награду: ₽ ${reward}`;
+
+    document.getElementById("confirmButton").textContent =
+        "Закрыть";
+
+    document.getElementById("confirmButton").onclick =
+        closeModal;
+}
+
+function getReward() {
+    const rewards = [
+        50,
+        100,
+        250,
+        500,
+        1000,
+        2500,
+        5000
+    ];
+
+    const randomIndex =
+        Math.floor(Math.random() * rewards.length);
+
+    return rewards[randomIndex];
+}
+
+function updateBalance() {
+    const balanceElement =
+        document.getElementById("balance");
+
+    if (balanceElement) {
+        balanceElement.textContent =
+            `₽ ${balance}`;
+    }
+}
